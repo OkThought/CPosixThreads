@@ -13,11 +13,17 @@ exit_cond_cleanup_fmt_v(int cond, int errcode, void (*cleanup)(void *), void *ar
     if (cleanup != NO_CLEANUP)
         cleanup(arg);
 
-    if (fmt != NULL)
+    if (fmt != NULL) {
         vfprintf(stderr, fmt, list);
 
-    if (errcode != NO_ERROR)
-        fprintf(stderr, ": %s\n", strerror(errcode));
+        if (errcode != NO_ERROR)
+            fprintf(stderr, ": %s\n", strerror(errcode));
+        else
+            fputc('\n', stderr);
+    } else {
+        if (errcode != NO_ERROR)
+            fputs(strerror(errcode), stderr);
+    }
 
     exit(EXIT_FAILURE);
 }
@@ -30,11 +36,15 @@ exit_cond_cleanup_msg(int cond, int errcode, void (*cleanup)(void *), void *arg,
     if (cleanup != NO_CLEANUP)
         cleanup(arg);
 
-    if (msg != NO_MESSAGE)
-        fputs(msg, stderr);
-
-    if (errcode != NO_ERROR)
-        fprintf(stderr, ": %s\n", strerror(errcode));
+    if (msg != NO_MESSAGE) {
+        if (errcode != NO_ERROR)
+            fprintf(stderr, "%s: %s\n", msg, strerror(errcode));
+        else
+            fputc('\n', stderr);
+    } else {
+        if (errcode != NO_ERROR)
+            fputs(strerror(errcode), stderr);
+    }
 
     exit(EXIT_FAILURE);
 }
