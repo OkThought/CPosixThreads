@@ -1,0 +1,11 @@
+# CLion files
+.idea/
+cmake-build-debug/
+
+# C object files
+*.o
+*.obj
+
+# C libraries
+*.a
+*.so
