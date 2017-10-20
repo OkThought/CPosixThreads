@@ -22,19 +22,58 @@ exit_cond_cleanup_fmt_v(int cond, int errcode, void (*cleanup)(void *), void *ar
     exit(EXIT_FAILURE);
 }
 
-void
-ExitIfNonZeroWithCleanupAndMessage(int code, void (*cleanup)(void *), void *arg, const char *msg) {
-	if (code == 0)
+static void
+exit_cond_cleanup_msg(int cond, int errcode, void (*cleanup)(void *), void *arg, const char *msg) {
+    if (!cond)
         return;
 
-	if (cleanup != NO_CLEANUP)
-		cleanup(arg);
+    if (cleanup != NO_CLEANUP)
+        cleanup(arg);
 
-	if (msg != NO_MESSAGE)
-        fprintf(stderr, "%s: ", msg);
+    if (msg != NO_MESSAGE)
+        fputs(msg, stderr);
 
-	fputs(strerror(code), stderr);
-	exit(EXIT_FAILURE);
+    if (errcode != NO_ERROR)
+        fprintf(stderr, ": %s\n", strerror(errcode));
+
+    exit(EXIT_FAILURE);
+}
+
+void
+ExitIfTrueWithErrcodeAndCleanupAndFormattedMessage(int cond, int code, void (*cleanup)(void *), void *arg,
+                                                   const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    exit_cond_cleanup_fmt_v(cond, code, cleanup, arg, fmt, list);
+    va_end(list);
+}
+
+void
+ExitIfTrueWithErrcodeAndCleanupAndMessage(int cond, int code, void (*cleanup)(void *), void *arg, const char *msg) {
+    exit_cond_cleanup_msg(cond, code, cleanup, arg, msg);
+}
+
+void
+ExitIfTrueWithErrcodeAndCleanup(int cond, int code, void (*cleanup)(void *), void *arg) {
+    exit_cond_cleanup_msg(cond, code, cleanup, arg, NO_MESSAGE);
+}
+
+void
+ExitIfTrueWithErrcodeAndFormattedMessage(int cond, int code, const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    exit_cond_cleanup_fmt_v(cond, code, NO_CLEANUP, NO_ARG, fmt, list);
+    va_end(list);
+}
+
+void
+ExitIfTrueWithErrcodeAndMessage(int cond, int code, const char *msg) {
+    exit_cond_cleanup_msg(cond, code, NO_CLEANUP, NO_ARG, msg);
+}
+
+void
+ExitIfNonZeroWithCleanupAndMessage(int code, void (*cleanup)(void *), void *arg, const char *msg) {
+	exit_cond_cleanup_msg((code != 0), code, cleanup, arg, msg);
 }
 
 void
@@ -47,12 +86,12 @@ ExitIfNonZeroWithCleanupAndFormattedMessage(int code, void (*cleanup)(void *), v
 
 void
 ExitIfNonZeroWithCleanup(int code, void (*cleanup)(void *), void *arg) {
-    ExitIfNonZeroWithCleanupAndMessage(code, cleanup, arg, NO_MESSAGE);
+    exit_cond_cleanup_msg((code != 0), code, cleanup, arg, NO_MESSAGE);
 }
 
 void
 ExitIfNonZeroWithMessage(int code, char *msg) {
-	ExitIfNonZeroWithCleanupAndMessage(code, NO_CLEANUP, NO_ARG, msg);
+	exit_cond_cleanup_msg((code != 0), code, NO_CLEANUP, NO_ARG, msg);
 }
 
 void
@@ -73,16 +112,7 @@ ExitIfNonZero(int code) {
 
 void
 ExitIfNullWithCleanupAndMessage(void *ptr, void (*cleanup)(void *), void *arg, const char *msg) {
-	if (ptr != NULL)
-        return;
-
-    if (cleanup != NO_CLEANUP)
-        cleanup(arg);
-
-    if (msg != NO_MESSAGE)
-        fputs(msg, stderr);
-
-    exit(EXIT_FAILURE);
+	exit_cond_cleanup_msg((ptr == NULL), NO_ERROR, cleanup, arg, msg);
 }
 
 void
@@ -95,12 +125,12 @@ ExitIfNullWithCleanupAndFormattedMessage(void *ptr, void (*cleanup)(void *), voi
 
 void
 ExitIfNullWithCleanup(void *ptr, void (*cleanup)(void *), void *arg) {
-    ExitIfNullWithCleanupAndMessage(ptr, cleanup, arg, NO_MESSAGE);
+    exit_cond_cleanup_msg((ptr == NULL), NO_ERROR, cleanup, arg, NO_MESSAGE);
 }
 
 void
 ExitIfNullWithMessage(void *ptr, const char *msg) {
-	ExitIfNullWithCleanupAndMessage(ptr, NO_CLEANUP, NO_ARG, msg);
+	exit_cond_cleanup_msg((ptr == NULL), NO_ERROR, NO_CLEANUP, NO_ARG, msg);
 }
 
 void
