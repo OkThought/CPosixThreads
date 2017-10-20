@@ -99,7 +99,7 @@ int main() {
     int i;
     for (i = 0; i < THREAD_NUMBER; ++i) {
         ret_code = InitStringListForThread(lists[i], i, NUMBER_STRINGS_PER_THREAD);
-        ExitIfNonZeroWithMessage(ret_code, "Couldn't initialize list of strings");
+        ExitIfNonZeroWithFormattedMessage(ret_code, "Couldn't initialize list of strings for thread #%d", i);
     }
 
     for (i = 0; i < THREAD_NUMBER; ++i) {
