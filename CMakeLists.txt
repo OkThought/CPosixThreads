@@ -50,4 +50,14 @@ target_link_libraries(task4 util)
 
 #============== task5 ==============
 
+set(TASK5_SOURCE_FILES task5/src/main.c)
+
+add_executable(task5 ${TASK5_SOURCE_FILES})
+
+target_include_directories(
+        task5 PUBLIC
+        util/headers
+)
+
+target_link_libraries(task5 util)
 
