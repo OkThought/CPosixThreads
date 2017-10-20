@@ -22,6 +22,32 @@ target_include_directories(
         util/headers
 )
 
+#============== task1 ==============
+
+set(TASK1_SOURCE_FILES task1/src/main.c)
+
+add_executable(task1 ${TASK1_SOURCE_FILES})
+
+target_include_directories(
+        task1 PUBLIC
+        util/headers
+)
+
+target_link_libraries(task1 util)
+
+#============== task2 ==============
+
+set(TASK2_SOURCE_FILES task2/src/main.c)
+
+add_executable(task2 ${TASK2_SOURCE_FILES})
+
+target_include_directories(
+        task2 PUBLIC
+        util/headers
+)
+
+target_link_libraries(task2 util)
+
 #============== task3 ==============
 
 set(TASK3_SOURCE_FILES task3/src/main.c)
@@ -61,3 +87,15 @@ target_include_directories(
 
 target_link_libraries(task5 util)
 
+#============== task7 ==============
+
+set(TASK7_SOURCE_FILES task7/src/main.c)
+
+add_executable(task7 ${TASK7_SOURCE_FILES})
+
+target_include_directories(
+        task7 PUBLIC
+        util/headers
+)
+
+target_link_libraries(task7 util)
