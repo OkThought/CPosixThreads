@@ -15,8 +15,7 @@ struct list_s {
     void (*ValueDestructor) (void *);
 };
 
-// private
-ListNode *
+static ListNode *
 list_node_create (void *value, ListNode *next) {
     ListNode *node_ptr = (ListNode *) malloc (sizeof (ListNode));
     if (node_ptr != NULL) {
@@ -26,10 +25,19 @@ list_node_create (void *value, ListNode *next) {
     return node_ptr;
 }
 
-// private
-void
+static void
 list_node_delete (ListNode *node_ptr) {
     free(node_ptr);
+}
+
+static int
+add_value_to_empty_list(List *list_ptr, void *value) {
+    ListNode *new_node_ptr = list_node_create (value, NULL);
+    if (new_node_ptr == NULL) return errno;
+    list_ptr->head = new_node_ptr;
+    list_ptr->tail = new_node_ptr;
+    list_ptr->size = 1;
+    return SUCCESS;
 }
 
 List *
@@ -67,17 +75,6 @@ ListDelete (List *list_ptr) {
     }
 
     free(list_ptr);
-}
-
-// private
-int
-add_value_to_empty_list(List *list_ptr, void *value) {
-    ListNode *new_node_ptr = list_node_create (value, NULL);
-    if (new_node_ptr == NULL) return errno;
-    list_ptr->head = new_node_ptr;
-    list_ptr->tail = new_node_ptr;
-    list_ptr->size = 1;
-    return SUCCESS;
 }
 
 int
