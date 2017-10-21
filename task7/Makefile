@@ -62,4 +62,4 @@ clean-all:
 run: $(TARGET)
 	$(ECHO) "start $(TARGET)"
 	$(ECHO) "________________________________"
-	$(RUN)
+	$(RUN) $(ARGS)
