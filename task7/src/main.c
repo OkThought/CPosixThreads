@@ -24,15 +24,14 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    int saved_errno = errno;
     errno = 0;
     long number_of_threads_long = strtol(argv[1], NULL, DECIMAL_BASE);
+    ExitIfNonZeroWithFormattedMessage(errno, "Couldn't convert '%s' to int", argv[1]);
+
     ExitIfTrueWithErrcodeAndMessage(number_of_threads_long <= 0 || number_of_threads_long > INT_MAX, EINVAL,
                                     "number_of_threads must be positive and must fit into int size");
 
     int number_of_threads = (int) number_of_threads_long;
-    ExitIfNonZeroWithFormattedMessage(errno, "Couldn't convert '%s' to int", argv[1]);
-    errno = saved_errno;
 
     pthread_t threads[number_of_threads];
     Payload *payloads = (Payload *) malloc(sizeof (Payload) * number_of_threads);
@@ -47,8 +46,7 @@ int main(int argc, char** argv) {
     int i;
     for (i = 0; i < number_of_threads; ++i) {
         payloads[i].start_index = prev_begin;
-        payloads[i].finish_index = prev_begin + iterations_per_thread + (i < iterations_rest);
-        prev_begin = payloads[i].finish_index;
+        prev_begin = payloads[i].finish_index = prev_begin + iterations_per_thread + (i < iterations_rest);
 
         code = pthread_create(threads + i, NULL, CalculatePI, (void *) (payloads + i));
         ExitIfNonZeroWithFormattedMessage(code, "Couldn't create thread #%d", i);
