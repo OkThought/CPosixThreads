@@ -37,6 +37,7 @@ void *Run(void *ignored) {
 
     int count;
     for (count = 1; ; ++count) {
+        pthread_testcancel();
         printf("Child counts \"%d\"\n", count);
         sleep(SECONDS_BETWEEN_MESSAGES);
     }
