@@ -10,7 +10,7 @@
 #define IGNORE_STATUS NULL
 #define DEFAULT_ATTRS NULL
 #define NO_ARG NULL
-#define EXECUTE_CLEANUP 0
+#define NOT_EXECUTE_CLEANUP 0
 
 void *Run(void *);
 void Cleanup(void *);
@@ -42,7 +42,7 @@ void *Run(void *ignored) {
         sleep(SECONDS_BETWEEN_MESSAGES);
     }
 
-    pthread_cleanup_pop(EXECUTE_CLEANUP);
+    pthread_cleanup_pop(NOT_EXECUTE_CLEANUP);
     pthread_exit(NULL);
 }
 
