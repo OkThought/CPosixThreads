@@ -7,8 +7,10 @@
 
 #define SECONDS_TO_WAIT_BEFORE_CANCELLING 3
 #define SECONDS_BETWEEN_MESSAGES 1
-#define EXECUTE_CLEANUP 0
 #define IGNORE_STATUS NULL
+#define DEFAULT_ATTRS NULL
+#define NO_ARG NULL
+#define EXECUTE_CLEANUP 0
 
 void *Run(void *);
 void Cleanup(void *);
@@ -16,16 +18,16 @@ void Cleanup(void *);
 int main() {
     pthread_t tid;
 
-    int code = pthread_create(&tid, NULL, Run, NULL);
-    ExitIfNonZeroWithMessage(code, "pthread_create");
+    int code = pthread_create(&tid, DEFAULT_ATTRS, Run, NO_ARG);
+    ExitIfNonZeroWithMessage(code, "Error in pthread_create");
 
     sleep(SECONDS_TO_WAIT_BEFORE_CANCELLING);
 
     code = pthread_cancel(tid);
-    ExitIfNonZeroWithMessage(code, "pthread_cancel");
+    ExitIfNonZeroWithMessage(code, "Error in pthread_cancel");
 
     code = pthread_join(tid, IGNORE_STATUS);
-    ExitIfNonZeroWithMessage(code, "pthread_join");
+    ExitIfNonZeroWithMessage(code, "Error in pthread_join");
 
     exit(EXIT_SUCCESS);
 }
