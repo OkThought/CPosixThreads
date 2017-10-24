@@ -38,3 +38,27 @@ void *Run(void *ignored) {
     }
     pthread_exit(NULL);
 }
+
+/*
+ * cancellation type (deferred, asynchronous)
+ *
+ * deferred means that cancellation can occur only at next cancellation point
+ * asynchronous means that cancellation can occur at any time
+ *
+ * deferred properties:
+ * - cancellation points are the only functions which respond to cancel requests under deferred cancelability
+ * - the general rule is that all blocking functions are usually cancellation points
+ * - when a thread reaches a cancellation point, the system checks for pending cancel message(s)
+ *   - if a cancel is pending, the system will call all cleanup functions (see section below) & terminate the thread
+ *   - if no cancel is pending, the function will proceed as normal
+ *   - while the cancellation point is executing, if a cancellation requst comes in while the function is blocked, the
+ *   wait will be interrupted and cleanup functions will be called
+ *
+ * asynchronous properties:
+ * - useful to interrupt computation intensive operations
+ * - avoid asynchronous cancelability at all costs -- it's dangerous
+ * - if you must, be sure to call no code while asynchronous cancellation is enabled unless it's async-cancel safe
+ * - while asynchronous cancellation is enabled, you cannot acquire any system resources
+ * - Cleanup handlers are still called, but other functions you call (which are not async-cancel safe),
+ * will not be able to clean up after themselves
+ */
