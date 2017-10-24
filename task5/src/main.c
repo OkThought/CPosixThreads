@@ -5,7 +5,7 @@
 #include <stdlib.h>         // exit
 #include <unistd.h>         // sleep
 
-#define SECONDS_TO_WAIT_BEFORE_CANCELLING 3
+#define SECONDS_TO_WAIT_BEFORE_CANCELLING 2
 #define SECONDS_BETWEEN_MESSAGES 1
 #define IGNORE_STATUS NULL
 #define DEFAULT_ATTRS NULL
@@ -17,7 +17,6 @@ void Cleanup(void *);
 
 int main() {
     pthread_t tid;
-
     int code = pthread_create(&tid, DEFAULT_ATTRS, Run, NO_ARG);
     ExitIfNonZeroWithMessage(code, "Error in pthread_create");
 
