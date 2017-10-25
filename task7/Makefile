@@ -1,5 +1,5 @@
 SRCDIR 					:= src
-INCDIR					:=
+INCDIR					:= include
 OUTDIR 					:= out
 OBJDIR					:= $(OUTDIR)/obj
 
