@@ -89,13 +89,28 @@ target_link_libraries(task5 util)
 
 #============== task7 ==============
 
-set(TASK7_SOURCE_FILES task7/src/main.c)
+set(TASK7_SOURCE_FILES task7/src/main.c task7/include/helpers.h task7/src/helpers.c)
 
 add_executable(task7 ${TASK7_SOURCE_FILES})
 
 target_include_directories(
         task7 PUBLIC
+        task7/include
         util/include
 )
 
 target_link_libraries(task7 util)
+
+#============== task8 ==============
+
+set(TASK8_SOURCE_FILES task8/src/main.c task8/src/helpers.c task8/include/helpers.h)
+
+add_executable(task8 ${TASK8_SOURCE_FILES})
+
+target_include_directories(
+        task8 PUBLIC
+        util/include
+        task8/include
+)
+
+target_link_libraries(task8 util)
