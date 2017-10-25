@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <limits.h>
+#include <helpers.h>
 
 
 void PrintUsage () {
@@ -30,17 +31,12 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
     }
 
     if (number_of_threads_long <= 0) {
-        fputs ("number_of_threads is not positive", stderr);
+        fputs ("number_of_threads is not positive\n", stderr);
         return EINVAL;
     }
 
-    if (number_of_threads_long > INT_MAX) {
-        fputs ("number_of_threads overflows int", stderr);
-        return EINVAL;
-    }
-
-    if (number_of_threads_long > max) {
-        fputs ("number of threads exceeds MAX_NUMBER_OF_THREADS", stderr);
+    if (number_of_threads_long > max || number_of_threads_long > INT_MAX) {
+        fputs ("the number of threads is too big\n", stderr);
         return EINVAL;
     }
 
@@ -80,6 +76,8 @@ CalculatePI (void *arg) {
         pi_part += 1.0/(i*4.0 + 1.0);
         pi_part -= 1.0/(i*4.0 + 3.0);
     }
+
+    payload->pi_part = pi_part;
 
     pthread_exit(arg);
 }

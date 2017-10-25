@@ -11,12 +11,16 @@ static const int MAX_NUMBER_OF_THREADS = 100;
 
 int main (int argc, char **argv) {
     if (argc != REQUIRED_NUMBER_OF_ARGUMENTS) {
-        PrintUsage();
-        exit(EXIT_FAILURE);
+        PrintUsage ();
+        exit (EXIT_FAILURE);
     }
 
     int number_of_threads;
-    ParseNumberOfThreads (argv[1], &number_of_threads, MAX_NUMBER_OF_THREADS);
+    int code;
+    char *number_of_threads_string = argv[1];
+    code = ParseNumberOfThreads (number_of_threads_string, &number_of_threads, MAX_NUMBER_OF_THREADS);
+    ExitIfNonZeroWithFormattedMessage (code, "Couldn't parse number of threads from string '%s'",
+                                       number_of_threads_string);
 
     Payload *payloads = ThreadPayloadsCreate (number_of_threads);
     ExitIfNullWithFormattedMessage ((void *) payloads, "Couldn't allocate %d payloads each of size %dB (total %dB)",
@@ -25,14 +29,14 @@ int main (int argc, char **argv) {
     ThreadPayloadsInit (payloads, number_of_threads, NUMBER_OF_ITERATIONS);
 
     pthread_t threads[number_of_threads];
-    int code = StartParallelPiCalculation (threads, number_of_threads, payloads);
+    code = StartParallelPiCalculation (threads, number_of_threads, payloads);
     ExitIfNonZeroWithCleanupAndMessage (code, ThreadPayloadsDelete, payloads,
-                                       "Error on start parallel pi calculation");
+                                        "Error on start parallel pi calculation");
 
     double pi;
     code = FinishParallelPiCalculation (threads, number_of_threads, &pi);
     ExitIfNonZeroWithCleanupAndMessage (code, ThreadPayloadsDelete, payloads,
-                                       "Error on finish parallel pi calculation");
+                                        "Error on finish parallel pi calculation");
 
     ThreadPayloadsDelete (payloads);
 
