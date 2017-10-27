@@ -109,8 +109,8 @@ add_executable(task8 ${TASK8_SOURCE_FILES})
 
 target_include_directories(
         task8 PUBLIC
-        util/include
         task8/include
+        util/include
 )
 
 target_link_libraries(task8 util)

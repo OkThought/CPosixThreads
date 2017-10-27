@@ -5,10 +5,30 @@
 #include <errno.h>
 #include <limits.h>
 #include <helpers.h>
+#include <signal.h>
 
+#define FALSE 0
+#define TRUE 1
 
-void PrintUsage () {
-    fputs("Usage:\t<program_name> <number_of_threads>", stderr);
+struct Payload {
+    int start;              // initial  value for i in the loop (including)
+    int step;               // step with which to iterate through the loop
+    int chunk;              // number of iterations per chunk
+    double pi_part;         // partial sum
+};
+
+int should_stop = FALSE;
+
+// private
+void
+interrupt_handler (int sig) {
+    puts ("\rStopping");
+    should_stop = TRUE;
+}
+
+void
+PrintUsage () {
+    fputs("Usage:\t<program_name> <number_of_threads>\n", stderr);
 }
 
 int
@@ -44,19 +64,6 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
     return SUCCESS;
 }
 
-void
-ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations) {
-    int iterations_per_thread = number_of_iterations / number_of_threads;
-    int iterations_rest = number_of_iterations - number_of_threads * iterations_per_thread;
-    int prev_begin = 0;
-
-    int i;
-    for (i = 0; i < number_of_threads; ++i) {
-        payloads[i].start_index = prev_begin;
-        prev_begin = payloads[i].finish_index = prev_begin + iterations_per_thread + (i < iterations_rest);
-    }
-}
-
 Payload*
 ThreadPayloadsCreate (int number_of_threads) {
     return (Payload *) malloc(sizeof (Payload) * number_of_threads);
@@ -67,14 +74,40 @@ ThreadPayloadsDelete (void *payloads) {
     free (payloads);
 }
 
+void
+ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations_per_chunk) {
+    int i;
+    for (i = 0; i < number_of_threads; ++i) {
+        payloads[i].start = i;
+        payloads[i].step = number_of_threads;
+        payloads[i].chunk = number_of_iterations_per_chunk;
+    }
+}
+
 void *
 CalculatePI (void *arg) {
     Payload *payload = (Payload *) arg;
     int i;
     double pi_part = 0;
-    for (i = payload->start_index; i < payload->finish_index; i++) {
-        pi_part += 1.0/(i*4.0 + 1.0);
-        pi_part -= 1.0/(i*4.0 + 3.0);
+
+    int chunk = payload->chunk;
+    int step = payload->step;
+    int start = payload->start;
+    int finish = chunk;
+
+    while (!should_stop) {
+        for (i = start; i < finish; i += step) {
+            pi_part += 1.0 / (i * 4.0 + 1.0);
+            pi_part -= 1.0 / (i * 4.0 + 3.0);
+        }
+
+        start += chunk;
+        finish += chunk;
+
+        if (finish < 0) {
+            // index overflowed: stop
+            break;
+        }
     }
 
     payload->pi_part = pi_part;
@@ -84,7 +117,17 @@ CalculatePI (void *arg) {
 
 int
 StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Payload *payloads) {
+    struct sigaction interrupt_sigaction;
+    interrupt_sigaction.__sigaction_u.__sa_handler = interrupt_handler;
+    interrupt_sigaction.sa_flags = SA_RESETHAND; // reset handler to default after first signal
+    interrupt_sigaction.sa_mask = 0;
     int code;
+    code = sigaction (SIGINT, &interrupt_sigaction, NULL);
+    if (code != SUCCESS) {
+        fprintf (stderr, "Couldn't set interrupt signal handler\n");
+        return code;
+    }
+
     int i;
     for (i = 0; i < number_of_threads; ++i) {
         code = pthread_create (threads + i, DEFAULT_ATTRS, CalculatePI, (void *) (payloads + i));
@@ -95,7 +138,6 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
     }
     return SUCCESS;
 }
-
 
 int
 FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *pi_ptr) {
