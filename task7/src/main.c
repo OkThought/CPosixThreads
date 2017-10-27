@@ -23,8 +23,7 @@ int main (int argc, char **argv) {
                                        number_of_threads_string);
 
     Payload *payloads = ThreadPayloadsCreate (number_of_threads);
-    ExitIfNullWithFormattedMessage ((void *) payloads, "Couldn't allocate %d payloads each of size %dB (total %dB)",
-                                    number_of_threads, sizeof (Payload), sizeof (Payload) * number_of_threads);
+    ExitIfNullWithFormattedMessage ((void *) payloads, "Couldn't create %d payloads", number_of_threads);
 
     ThreadPayloadsInit (payloads, number_of_threads, NUMBER_OF_ITERATIONS);
 
