@@ -21,7 +21,12 @@ int should_stop = FALSE;
 
 // private
 void
+#ifdef __APPLE__
 interrupt_handler (int sig) {
+#else
+interrupt_handler () {
+#endif
+
     puts ("\rStopping");
     should_stop = TRUE;
 }
@@ -118,9 +123,14 @@ CalculatePI (void *arg) {
 int
 StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Payload *payloads) {
     struct sigaction interrupt_sigaction;
+#ifdef __APPLE__
     interrupt_sigaction.__sigaction_u.__sa_handler = interrupt_handler;
+#else
+    interrupt_sigaction.sa_handler = interrupt_handler;
+#endif
     interrupt_sigaction.sa_flags = SA_RESETHAND; // reset handler to default after first signal
-    interrupt_sigaction.sa_mask = 0;
+    sigemptyset (&interrupt_sigaction.sa_mask); // empty set of blocked signals
+
     int code;
     code = sigaction (SIGINT, &interrupt_sigaction, NULL);
     if (code != SUCCESS) {
