@@ -5,7 +5,7 @@
 #include <stdlib.h>     // exit
 #include <string.h>     // strerror
 
-#define DEFAULT_ATTRS NULL
+#define DEFAULT_ATTR NULL
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
@@ -75,7 +75,7 @@ initializeResources () {
         return code;
     };
 
-    code = pthread_cond_init (&cond, DEFAULT_ATTRS);
+    code = pthread_cond_init (&cond, DEFAULT_ATTR);
     if (code != SUCCESS) {
         fputs("Couldn't init cond\n", stderr);
         return code;
@@ -111,7 +111,7 @@ main(int argc, char **argv) {
     code = initializeResources ();
     ExitIfNonZeroWithMessage (code, "Couldn't initialize resources");
 
-    code = pthread_create (&child_thread, DEFAULT_ATTRS, RunChild, NO_ARG);
+    code = pthread_create (&child_thread, DEFAULT_ATTR, RunChild, NO_ARG);
     if (code != SUCCESS) {
         (void) destroyResources ();
         exit_status = EXIT_FAILURE;

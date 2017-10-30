@@ -139,7 +139,7 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
 
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        code = pthread_create (threads + i, DEFAULT_ATTRS, CalculatePI, (void *) (payloads + i));
+        code = pthread_create (threads + i, DEFAULT_ATTR, CalculatePI, (void *) (payloads + i));
         if (code != SUCCESS) {
             fprintf(stderr, "Couldn't create thread #%d\n", i);
             return code;

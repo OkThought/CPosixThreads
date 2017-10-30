@@ -8,14 +8,14 @@
 #define SECONDS_TO_WAIT_BEFORE_CANCELLING 2
 #define SECONDS_BETWEEN_MESSAGES 1
 #define IGNORE_STATUS NULL
-#define DEFAULT_ATTRS NULL
+#define DEFAULT_ATTR NULL
 #define NO_ARG NULL
 
 void *Run(void *);
 
 int main() {
     pthread_t tid;
-    int code = pthread_create(&tid, DEFAULT_ATTRS, Run, NO_ARG);
+    int code = pthread_create(&tid, DEFAULT_ATTR, Run, NO_ARG);
     ExitIfNonZeroWithMessage(code, "Error in pthread_create");
 
     sleep(SECONDS_TO_WAIT_BEFORE_CANCELLING);

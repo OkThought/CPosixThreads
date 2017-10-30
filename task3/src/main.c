@@ -11,7 +11,7 @@
 #define NUMBER_STRINGS_PER_THREAD 16
 #define STRING_SIZE_MAX 32
 #define SUCCESS 0
-#define DEFAULT_ATTRS NULL
+#define DEFAULT_ATTR NULL
 #define IGNORE_STATUS NULL
 
 /*
@@ -103,7 +103,7 @@ int main() {
     }
 
     for (i = 0; i < THREAD_NUMBER; ++i) {
-        ret_code = pthread_create(threads+i, DEFAULT_ATTRS, Run, (void*) lists[i]);
+        ret_code = pthread_create(threads+i, DEFAULT_ATTR, Run, (void*) lists[i]);
         if (ret_code != 0) {
             fprintf(stderr, "Error on pthread_create thread#%d: %s\n", i, strerror(ret_code));
             exit_value = EXIT_FAILURE;

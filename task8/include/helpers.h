@@ -4,7 +4,7 @@
 #include <pthread.h>
 
 #define SUCCESS 0
-#define DEFAULT_ATTRS NULL
+#define DEFAULT_ATTR NULL
 
 typedef struct Payload Payload;
 

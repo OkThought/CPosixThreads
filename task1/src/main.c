@@ -4,7 +4,7 @@
 #include <pthread.h>    // pthread_*
 
 #define NUMBER_OF_LINES 10
-#define DEFAULT_ATTRS NULL
+#define DEFAULT_ATTR NULL
 #define NO_ARG NULL
 #define NO_STATUS NULL
 
@@ -23,7 +23,7 @@ void* RunBill(void *ignored) {
 int main(int argc, char **argv) {
     pthread_t bill;
 
-    int code = pthread_create(&bill, DEFAULT_ATTRS, RunBill, NO_ARG);
+    int code = pthread_create(&bill, DEFAULT_ATTR, RunBill, NO_ARG);
 
     ExitIfNonZeroWithMessage(code, "Couldn't start Bill's thread");
 
