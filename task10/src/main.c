@@ -33,7 +33,7 @@ void PrintCount (enum Entity executingEntity, const char *name, int from, int to
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
     for (count = from; count <= to; ++count) {
-        // EINVAL       The value specified by mutex is invalid. (will not happen)
+        // EINVAL:       The value specified by mutex is invalid. (will not happen)
         // EDEADLK:     A deadlock would occur if the thread blocked waiting for mutex. (will not happen)
         (void) pthread_mutex_lock (&mutex);
 
@@ -118,11 +118,12 @@ int main(int argc, char **argv) {
 
     PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
 
-    // [EINVAL]     The implementation has detected that the value specified by thread does not refer
-    // to a joinable thread. (will not happen)
-    // [ESRCH]      No thread could be found corresponding to that specified by the given thread ID, thread.
+    // EINVAL:   The implementation has detected that the value specified by thread does not refer to a joinable thread.
     // (will not happen)
-    // [EDEADLK]    A deadlock was detected or the value of thread specifies the calling thread. (will not happen)
+    // ESRCH:    No thread could be found corresponding to that specified by the given thread ID, thread.
+    // (will not happen)
+    // EDEADLK:  A deadlock was detected or the value of thread specifies the calling thread.
+    // (will not happen)
     (void) pthread_join(child_thread, IGNORE_STATUS);
 
     code = destroyResources ();
