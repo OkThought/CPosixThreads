@@ -34,29 +34,22 @@ int PrintCount (enum Entity executingEntity, const char *name, int from, int to)
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
     for (count = from; count <= to; ++count) {
-        code = pthread_mutex_lock (&mutex);
-        if (code != SUCCESS) {
-            fprintf (stderr, "Couldn't lock the mutex in %s: %s\n", name, strerror(code));
-            return code;
-        }
+        // EINVAL       The value specified by mutex is invalid. (will not happen)
+        // EDEADLK:     A deadlock would occur if the thread blocked waiting for mutex. (will not happen)
+        (void) pthread_mutex_lock (&mutex);
 
         while (printingEntity != executingEntity) {
-            code = pthread_cond_wait (&cond, &mutex);
-            if (code != SUCCESS) {
-                fprintf (stderr, "Couldn't wait for cond on mutex in %s: %s\n", name, strerror(code));
-                return code;
-            }
+            // EINVAL:  The value specified by cond or the value specified by mutex is invalid. (will not happen)
+            (void) pthread_cond_wait (&cond, &mutex);
         }
 
-        printf ("%*s counts %d\n", NAME_LENGTH, name, count);
+        (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
 
         printingEntity = waitingEntity ;
 
-        code = pthread_mutex_unlock (&mutex);
-        if (code != SUCCESS) {
-            fprintf (stderr, "Couldn't unlock the mutex in %s: %s\n", name, strerror(code));
-            return code;
-        }
+        // EINVAL:  The value specified by mutex is invalid. (will not happen)
+        // EPERM:   The current thread does not hold a lock on mutex. (will not happen)
+        (void) pthread_mutex_unlock (&mutex);
     }
 
     return SUCCESS;
