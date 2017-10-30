@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <limits.h>
-#include <helpers.h>
-
 
 void PrintUsage () {
     fputs("Usage:\t<program_name> <number_of_threads>\n", stderr);
