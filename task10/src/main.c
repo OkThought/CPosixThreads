@@ -66,11 +66,8 @@ int initializeResources () {
         return code;
     };
 
-    code = pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
-    if (code != SUCCESS) {
-        fputs("Couldn't set mutex type to ERRORCHECK\n", stderr);
-        return code;
-    };
+    // EINVAL:   The value specified either by type or attr is invalid. (will not happen)
+    (void) pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
 
     code = pthread_mutex_init (&mutex, &mutexattr);
     if (code != SUCCESS) {
@@ -84,11 +81,8 @@ int initializeResources () {
         return code;
     };
 
-    code = pthread_mutexattr_destroy (&mutexattr);
-    if (code != SUCCESS) {
-        fputs("Couldn't destroy mutex attributes object\n", stderr);
-        return code;
-    };
+    // EINVAL:  Invalid value for attr. (ignore)
+    (void) pthread_mutexattr_destroy (&mutexattr);
 
     return SUCCESS;
 }
@@ -124,12 +118,12 @@ int main(int argc, char **argv) {
 
     PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
 
-    code = pthread_join(child_thread, IGNORE_STATUS);
-    if (code != SUCCESS) {
-        (void) destroyResources ();
-        exit_status = EXIT_FAILURE;
-        fputs("Couldn't join child_thread\n", stderr);
-    };
+    // [EINVAL]     The implementation has detected that the value specified by thread does not refer
+    // to a joinable thread. (will not happen)
+    // [ESRCH]      No thread could be found corresponding to that specified by the given thread ID, thread.
+    // (will not happen)
+    // [EDEADLK]    A deadlock was detected or the value of thread specifies the calling thread. (will not happen)
+    (void) pthread_join(child_thread, IGNORE_STATUS);
 
     code = destroyResources ();
     if (code != SUCCESS) {
