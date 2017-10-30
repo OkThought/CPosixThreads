@@ -25,7 +25,8 @@ enum Entity {
 
 static enum Entity printingEntity = PARENT;
 
-void PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
+void
+PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
     int count;
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
@@ -49,12 +50,14 @@ void PrintCount (enum Entity executingEntity, const char *name, int from, int to
     }
 }
 
-void* RunChild (void *ignored) {
+void*
+RunChild (void *ignored) {
     PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
     pthread_exit (NO_STATUS);
 }
 
-int initializeResources () {
+int
+initializeResources () {
     int code;
 
     code = pthread_mutexattr_init (&mutexattr);
@@ -84,7 +87,8 @@ int initializeResources () {
     return SUCCESS;
 }
 
-int destroyResources() {
+int
+destroyResources() {
     int code;
 
     code = pthread_mutex_destroy (&mutex);
@@ -98,7 +102,8 @@ int destroyResources() {
     return code;
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv) {
     pthread_t child_thread;
     int code;
     int exit_status = EXIT_SUCCESS;
