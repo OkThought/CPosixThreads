@@ -9,8 +9,6 @@
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
-#define TRUE 1
-#define FALSE 0
 
 static const int COUNT_FROM = 1;
 static const int COUNT_TO = 10;
