@@ -114,3 +114,16 @@ target_include_directories(
 )
 
 target_link_libraries(task8 util)
+
+#============== task10 ==============
+
+set(TASK10_SOURCE_FILES task10/src/main.c)
+
+add_executable(task10 ${TASK10_SOURCE_FILES})
+
+target_include_directories(
+        task10 PUBLIC
+        util/include
+)
+
+target_link_libraries(task10 util)
