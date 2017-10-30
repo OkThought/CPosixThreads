@@ -2,7 +2,6 @@
 
 #include <stdio.h>      // puts
 #include <pthread.h>    // pthread_*
-#include <unistd.h>     // sleep
 #include <stdlib.h>     // exit
 #include <string.h>     // strerror
 
