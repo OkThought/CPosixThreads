@@ -28,9 +28,8 @@ enum Entity {
 
 static enum Entity printingEntity = PARENT;
 
-int PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
+void PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
     int count;
-    int code;
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
     for (count = from; count <= to; ++count) {
@@ -51,8 +50,6 @@ int PrintCount (enum Entity executingEntity, const char *name, int from, int to)
         // EPERM:   The current thread does not hold a lock on mutex. (will not happen)
         (void) pthread_mutex_unlock (&mutex);
     }
-
-    return SUCCESS;
 }
 
 void* RunChild (void *ignored) {
@@ -125,12 +122,7 @@ int main(int argc, char **argv) {
         fputs("Couldn't start child_thread\n", stderr);
     };
 
-    code = PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
-    if (code != SUCCESS) {
-        (void) destroyResources ();
-        exit_status = EXIT_FAILURE;
-        fputs("Error in PrintCount\n", stderr);
-    };
+    PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
 
     code = pthread_join(child_thread, IGNORE_STATUS);
     if (code != SUCCESS) {
