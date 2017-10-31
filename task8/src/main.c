@@ -23,22 +23,22 @@ main (int argc, char **argv) {
     ExitIfNonZeroWithFormattedMessage (code, "Couldn't parse number of threads from string '%s'",
                                        number_of_threads_string);
 
-    Payload *payloads = ThreadPayloadsCreate (number_of_threads);
-    ExitIfNullWithFormattedMessage ((void *) payloads, "Couldn't create %d payloads", number_of_threads);
+    ThreadTask *tasks = ThreadTasksCreate (number_of_threads);
+    ExitIfNullWithFormattedMessage ((void *) tasks, "Couldn't create %d tasks", number_of_threads);
 
-    ThreadPayloadsInit (payloads, number_of_threads, NUMBER_OF_ITERATIONS);
+    ThreadTasksInit (tasks, number_of_threads, NUMBER_OF_ITERATIONS);
 
     pthread_t threads[number_of_threads];
-    code = StartParallelPiCalculation (threads, number_of_threads, payloads);
-    ExitIfNonZeroWithCleanupAndMessage (code, ThreadPayloadsDelete, payloads,
+    code = StartParallelPiCalculation (threads, number_of_threads, tasks);
+    ExitIfNonZeroWithCleanupAndMessage (code, ThreadTasksDelete, tasks,
                                         "Error on start parallel pi calculation");
 
     double pi;
     code = FinishParallelPiCalculation (threads, number_of_threads, &pi);
-    ExitIfNonZeroWithCleanupAndMessage (code, ThreadPayloadsDelete, payloads,
+    ExitIfNonZeroWithCleanupAndMessage (code, ThreadTasksDelete, tasks,
                                         "Error on finish parallel pi calculation");
 
-    ThreadPayloadsDelete (payloads);
+    ThreadTasksDelete (tasks);
 
     printf ("pi done - %.15g \n", pi);
     printf ("actual  - %.15g \n", M_PI);

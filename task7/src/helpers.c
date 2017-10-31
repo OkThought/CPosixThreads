@@ -45,35 +45,35 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
     return SUCCESS;
 }
 
-Payload*
-ThreadPayloadsCreate (int number_of_threads) {
-    return (Payload *) malloc(sizeof (Payload) * number_of_threads);
+ThreadTask*
+ThreadTasksCreate (int number_of_threads) {
+    return (ThreadTask *) malloc(sizeof (ThreadTask) * number_of_threads);
 }
 
 void
-ThreadPayloadsDelete (void *payloads) {
-    free (payloads);
+ThreadTasksDelete (void *tasks) {
+    free (tasks);
 }
 
 void
-ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations) {
+ThreadTasksInit (ThreadTask *tasks, int number_of_threads, int number_of_iterations) {
     int iterations_per_thread = number_of_iterations / number_of_threads;
     int iterations_rest = number_of_iterations - number_of_threads * iterations_per_thread;
     int prev_begin = 0;
 
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        payloads[i].start_index = prev_begin;
-        prev_begin = payloads[i].finish_index = prev_begin + iterations_per_thread + (i < iterations_rest);
+        tasks[i].start_index = prev_begin;
+        prev_begin = tasks[i].finish_index = prev_begin + iterations_per_thread + (i < iterations_rest);
     }
 }
 
 int
-StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Payload *payloads) {
+StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const ThreadTask *tasks) {
     int code;
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        code = pthread_create (threads + i, DEFAULT_ATTR, calculate_pi, (void *) (payloads + i));
+        code = pthread_create (threads + i, DEFAULT_ATTR, calculate_pi, (void *) (tasks + i));
         if (code != SUCCESS) {
             fprintf(stderr, "Couldn't create thread #%d\n", i);
             return code;
@@ -85,7 +85,7 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
 int
 FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *pi_ptr) {
     void *status;
-    Payload *current_payload_ptr;
+    ThreadTask *current_task_ptr;
     double pi = 0;
     int code;
     int i;
@@ -96,8 +96,8 @@ FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *
             return code;
         }
 
-        current_payload_ptr = (Payload *) status;
-        pi += current_payload_ptr->pi_part;
+        current_task_ptr = (ThreadTask *) status;
+        pi += current_task_ptr->pi_part;
     }
 
     *pi_ptr = pi * 4;
@@ -107,15 +107,15 @@ FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *
 
 void *
 calculate_pi (void *arg) {
-    Payload *payload = (Payload *) arg;
+    ThreadTask *task = (ThreadTask *) arg;
     int i;
     double pi_part = 0;
-    for (i = payload->start_index; i < payload->finish_index; i++) {
+    for (i = task->start_index; i < task->finish_index; i++) {
         pi_part += 1.0/(i*4.0 + 1.0);
         pi_part -= 1.0/(i*4.0 + 3.0);
     }
 
-    payload->pi_part = pi_part;
+    task->pi_part = pi_part;
 
     pthread_exit(arg);
 }

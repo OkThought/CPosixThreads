@@ -9,7 +9,7 @@
 #define FALSE 0
 #define TRUE 1
 
-struct Payload {
+struct ThreadTask {
     int start;              // initial  value for i in the loop (including)
     int step;               // step with which to iterate through the loop
     int chunk;              // number of iterations per chunk
@@ -64,28 +64,28 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
     return SUCCESS;
 }
 
-Payload*
-ThreadPayloadsCreate (int number_of_threads) {
-    return (Payload *) malloc(sizeof (Payload) * number_of_threads);
+ThreadTask*
+ThreadTasksCreate (int number_of_threads) {
+    return (ThreadTask *) malloc(sizeof (ThreadTask) * number_of_threads);
 }
 
 void
-ThreadPayloadsDelete (void *payloads) {
-    free (payloads);
+ThreadTasksDelete (void *tasks) {
+    free (tasks);
 }
 
 void
-ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations_per_chunk) {
+ThreadTasksInit (ThreadTask *tasks, int number_of_threads, int number_of_iterations_per_chunk) {
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        payloads[i].start = i;
-        payloads[i].step = number_of_threads;
-        payloads[i].chunk = number_of_iterations_per_chunk;
+        tasks[i].start = i;
+        tasks[i].step = number_of_threads;
+        tasks[i].chunk = number_of_iterations_per_chunk;
     }
 }
 
 int
-StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Payload *payloads) {
+StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const ThreadTask *tasks) {
     struct sigaction interrupt_sigaction;
 #ifdef __APPLE__
     interrupt_sigaction.__sigaction_u.__sa_handler = interrupt_handler;
@@ -104,7 +104,7 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
 
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        code = pthread_create (threads + i, DEFAULT_ATTR, calculate_pi, (void *) (payloads + i));
+        code = pthread_create (threads + i, DEFAULT_ATTR, calculate_pi, (void *) (tasks + i));
         if (code != SUCCESS) {
             fprintf(stderr, "Couldn't create thread #%d\n", i);
             return code;
@@ -116,7 +116,7 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
 int
 FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *pi_ptr) {
     void *status;
-    Payload *current_payload_ptr;
+    ThreadTask *current_task_ptr;
     double pi = 0;
     int code;
     int i;
@@ -127,8 +127,8 @@ FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *
             return code;
         }
 
-        current_payload_ptr = (Payload *) status;
-        pi += current_payload_ptr->pi_part;
+        current_task_ptr = (ThreadTask *) status;
+        pi += current_task_ptr->pi_part;
     }
 
     *pi_ptr = pi * 4;
@@ -147,13 +147,13 @@ interrupt_handler (int sig) {
 
 void *
 calculate_pi (void *arg) {
-    Payload *payload = (Payload *) arg;
+    ThreadTask *task = (ThreadTask *) arg;
     int i;
     double pi_part = 0;
 
-    int chunk = payload->chunk;
-    int step = payload->step;
-    int start = payload->start;
+    int chunk = task->chunk;
+    int step = task->step;
+    int start = task->start;
     int finish = chunk;
 
     while (!should_stop) {
@@ -171,7 +171,7 @@ calculate_pi (void *arg) {
         }
     }
 
-    payload->pi_part = pi_part;
+    task->pi_part = pi_part;
 
     pthread_exit(arg);
 }

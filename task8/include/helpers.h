@@ -6,14 +6,14 @@
 #define SUCCESS 0
 #define DEFAULT_ATTR NULL
 
-typedef struct Payload Payload;
+typedef struct ThreadTask ThreadTask;
 
 void         PrintUsage();
 int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
-Payload*     ThreadPayloadsCreate (int number_of_threads);
-void         ThreadPayloadsDelete (void *payloads);
-void         ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations_per_chunk);
-int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const Payload *payloads);
+ThreadTask*  ThreadTasksCreate (int number_of_threads);
+void         ThreadTasksDelete (void *tasks);
+void         ThreadTasksInit (ThreadTask *tasks, int number_of_threads, int number_of_iterations_per_chunk);
+int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const ThreadTask *tasks);
 int          FinishParallelPiCalculation (pthread_t *thread_ptr, int number_of_threads, double *pi_ptr);
 
 
