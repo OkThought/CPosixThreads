@@ -57,6 +57,7 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
 
     if (number_of_threads_long > max || number_of_threads_long > INT_MAX) {
         fputs ("the number of threads is too big\n", stderr);
+        PrintUsage ();
         return EINVAL;
     }
 
