@@ -5,6 +5,12 @@
 #include <errno.h>
 #include <limits.h>
 
+struct ThreadTask {
+    int start_index;        // initial  value for i in the loop (including)
+    int finish_index;       // final    value for i in the loop (excluding)
+    double pi_part;         // partial sum
+};
+
 static void        *calculate_pi (void *);
 
 void

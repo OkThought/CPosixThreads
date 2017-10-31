@@ -6,11 +6,7 @@
 #define SUCCESS 0
 #define DEFAULT_ATTR NULL
 
-typedef struct {
-    int start_index;        // initial  value for i in the loop (including)
-    int finish_index;       // final    value for i in the loop (excluding)
-    double pi_part;         // partial sum
-} ThreadTask;
+typedef struct ThreadTask ThreadTask;
 
 void         PrintUsage ();
 int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
