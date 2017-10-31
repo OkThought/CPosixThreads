@@ -21,9 +21,9 @@ int should_stop = FALSE;
 static void        *calculate_pi (void *);
 
 #ifdef __APPLE__
-void         interrupt_handler (int sig);
+void                interrupt_handler (int sig);
 #else
-void         interrupt_handler ();
+void                interrupt_handler ();
 #endif
 
 void
