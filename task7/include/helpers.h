@@ -14,7 +14,6 @@ typedef struct {
 
 void         PrintUsage();
 int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
-void        *CalculatePI (void *);
 Payload*     ThreadPayloadsCreate (int number_of_threads);
 void         ThreadPayloadsDelete (void *payloads);
 void         ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iterations);

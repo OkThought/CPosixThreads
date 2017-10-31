@@ -18,17 +18,13 @@ struct Payload {
 
 int should_stop = FALSE;
 
-// private
-void
-#ifdef __APPLE__
-interrupt_handler (int sig) {
-#else
-interrupt_handler () {
-#endif
+static void        *calculate_pi (void *);
 
-    puts ("\rStopping");
-    should_stop = TRUE;
-}
+#ifdef __APPLE__
+void         interrupt_handler (int sig);
+#else
+void         interrupt_handler ();
+#endif
 
 void
 PrintUsage () {
@@ -88,37 +84,6 @@ ThreadPayloadsInit (Payload *payloads, int number_of_threads, int number_of_iter
     }
 }
 
-void *
-CalculatePI (void *arg) {
-    Payload *payload = (Payload *) arg;
-    int i;
-    double pi_part = 0;
-
-    int chunk = payload->chunk;
-    int step = payload->step;
-    int start = payload->start;
-    int finish = chunk;
-
-    while (!should_stop) {
-        for (i = start; i < finish; i += step) {
-            pi_part += 1.0 / (i * 4.0 + 1.0);
-            pi_part -= 1.0 / (i * 4.0 + 3.0);
-        }
-
-        start += chunk;
-        finish += chunk;
-
-        if (finish < 0) {
-            // index overflowed: stop
-            break;
-        }
-    }
-
-    payload->pi_part = pi_part;
-
-    pthread_exit(arg);
-}
-
 int
 StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Payload *payloads) {
     struct sigaction interrupt_sigaction;
@@ -139,7 +104,7 @@ StartParallelPiCalculation (pthread_t *threads, int number_of_threads, const Pay
 
     int i;
     for (i = 0; i < number_of_threads; ++i) {
-        code = pthread_create (threads + i, DEFAULT_ATTR, CalculatePI, (void *) (payloads + i));
+        code = pthread_create (threads + i, DEFAULT_ATTR, calculate_pi, (void *) (payloads + i));
         if (code != SUCCESS) {
             fprintf(stderr, "Couldn't create thread #%d\n", i);
             return code;
@@ -168,4 +133,45 @@ FinishParallelPiCalculation (pthread_t *threads, int number_of_threads, double *
 
     *pi_ptr = pi * 4;
     return SUCCESS;
+}
+
+void
+#ifdef __APPLE__
+interrupt_handler (int sig) {
+#else
+    interrupt_handler () {
+#endif
+    puts ("\rStopping");
+    should_stop = TRUE;
+}
+
+void *
+calculate_pi (void *arg) {
+    Payload *payload = (Payload *) arg;
+    int i;
+    double pi_part = 0;
+
+    int chunk = payload->chunk;
+    int step = payload->step;
+    int start = payload->start;
+    int finish = chunk;
+
+    while (!should_stop) {
+        for (i = start; i < finish; i += step) {
+            pi_part += 1.0 / (i * 4.0 + 1.0);
+            pi_part -= 1.0 / (i * 4.0 + 3.0);
+        }
+
+        start += chunk;
+        finish += chunk;
+
+        if (finish < 0) {
+            // index overflowed: stop
+            break;
+        }
+    }
+
+    payload->pi_part = pi_part;
+
+    pthread_exit(arg);
 }
