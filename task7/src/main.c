@@ -7,7 +7,6 @@
 
 static const int NUMBER_OF_ITERATIONS = 200000000; // 2 * 10^8
 static const int REQUIRED_NUMBER_OF_ARGUMENTS = 2;
-static const int MAX_NUMBER_OF_THREADS = 100;
 
 int
 main (int argc, char **argv) {

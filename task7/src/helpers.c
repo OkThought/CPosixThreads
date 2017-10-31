@@ -15,7 +15,9 @@ static void        *calculate_pi (void *);
 
 void
 PrintUsage () {
-    fputs("Usage:\t<program_name> <number_of_threads>\n", stderr);
+    fputs ("Usage:\t<program_name> <number_of_threads>\n\n", stderr);
+    fprintf (stderr, "\t<number_of_threads> - number of threads to run pi calculation on. Maximum: %d\n",
+             MAX_NUMBER_OF_THREADS);
 }
 
 int

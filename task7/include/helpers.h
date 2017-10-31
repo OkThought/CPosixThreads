@@ -6,6 +6,8 @@
 #define SUCCESS 0
 #define DEFAULT_ATTR NULL
 
+static const int MAX_NUMBER_OF_THREADS = 100;
+
 typedef struct ThreadTask ThreadTask;
 
 void         PrintUsage ();
