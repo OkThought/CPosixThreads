@@ -29,6 +29,8 @@ void                interrupt_handler ();
 void
 PrintUsage () {
     fputs("Usage:\t<program_name> <number_of_threads>\n", stderr);
+    fprintf (stderr, "\t<number_of_threads> - number of threads to run pi calculation on. Maximum: %d\n",
+             MAX_NUMBER_OF_THREADS);
 }
 
 int
@@ -42,16 +44,19 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
     long number_of_threads_long = strtol (number_of_threads_string, &first_invalid_char, DECIMAL_BASE);
     if (errno != 0 || first_invalid_char == number_of_threads_string) {
         fprintf (stderr, "Couldn't parse int '%s' with base %d\n", number_of_threads_string, DECIMAL_BASE);
+        PrintUsage ();
         return errno;
     };
 
     if (*first_invalid_char != '\0') {
         fprintf (stderr, "'%s' is not a number\n", number_of_threads_string);
+        PrintUsage ();
         return EINVAL;
     }
 
     if (number_of_threads_long <= 0) {
         fputs ("number_of_threads is not positive\n", stderr);
+        PrintUsage ();
         return EINVAL;
     }
 
