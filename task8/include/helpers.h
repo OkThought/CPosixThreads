@@ -8,14 +8,14 @@
 
 static const int MAX_NUMBER_OF_THREADS = 100;
 
-typedef struct ThreadTask ThreadTask;
+typedef struct PiCalcTask PiCalcTask;
 
 void         PrintUsage();
 int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
-ThreadTask*  ThreadTasksCreate (int number_of_threads);
-void         ThreadTasksDelete (void *tasks);
-void         ThreadTasksInit (ThreadTask *tasks, int number_of_threads, int number_of_iterations_per_chunk);
-int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const ThreadTask *tasks);
+PiCalcTask*  PiCalcTasksCreate (int number_of_threads);
+void         PiCalcTasksDelete (void *tasks);
+void         PiCalcTasksInit (PiCalcTask *tasks, int number_of_threads, int number_of_iterations_per_chunk);
+int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const PiCalcTask *tasks);
 int          FinishParallelPiCalculation (pthread_t *thread_ptr, int number_of_threads, double *pi_ptr);
 
 
