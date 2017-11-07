@@ -5,7 +5,7 @@
 #include <stdlib.h>         // exit
 #include <math.h>           // M_PI
 
-static const int NUMBER_OF_ITERATIONS = 200000000; // 2 * 10^8
+static const int NUMBER_OF_ITERATIONS_PER_CHUNK = 1024;
 static const int REQUIRED_NUMBER_OF_ARGUMENTS = 2;
 
 int
@@ -25,7 +25,7 @@ main (int argc, char **argv) {
     PiCalcTask *tasks = PiCalcTasksCreate (number_of_threads);
     ExitIfNullWithFormattedMessage ((void *) tasks, "Couldn't create %d tasks", number_of_threads);
 
-    PiCalcTasksInit (tasks, number_of_threads, NUMBER_OF_ITERATIONS);
+    PiCalcTasksInit (tasks, number_of_threads, NUMBER_OF_ITERATIONS_PER_CHUNK);
 
     pthread_t threads[number_of_threads];
     code = StartParallelPiCalculation (threads, number_of_threads, tasks);
