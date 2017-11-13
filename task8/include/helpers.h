@@ -14,8 +14,9 @@ void         PrintUsage();
 int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
 PiCalcTask*  PiCalcTasksCreate (int number_of_threads);
 void         PiCalcTasksDelete (void *tasks);
-void         PiCalcTasksInit (PiCalcTask *tasks, int number_of_threads, int number_of_iterations_per_chunk);
-int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const PiCalcTask *tasks);
+void         PiCalcTasksInit (PiCalcTask *tasks, int number_of_threads);
+int          StartParallelPiCalculation(pthread_t *thread_ptr, int number_of_threads, const PiCalcTask *tasks,
+                                        int number_of_iterations_per_chunk);
 int          FinishParallelPiCalculation (pthread_t *thread_ptr, int number_of_threads, double *pi_ptr);
 
 

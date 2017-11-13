@@ -25,10 +25,10 @@ main (int argc, char **argv) {
     PiCalcTask *tasks = PiCalcTasksCreate (number_of_threads);
     ExitIfNullWithFormattedMessage ((void *) tasks, "Couldn't create %d tasks", number_of_threads);
 
-    PiCalcTasksInit (tasks, number_of_threads, NUMBER_OF_ITERATIONS_PER_CHUNK);
+    PiCalcTasksInit (tasks, number_of_threads);
 
     pthread_t threads[number_of_threads];
-    code = StartParallelPiCalculation (threads, number_of_threads, tasks);
+    code = StartParallelPiCalculation (threads, number_of_threads, tasks, NUMBER_OF_ITERATIONS_PER_CHUNK);
     ExitIfNonZeroWithCleanupAndMessage (code, PiCalcTasksDelete, tasks,
                                         "Error on start parallel pi calculation");
 
