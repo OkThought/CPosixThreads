@@ -7,11 +7,12 @@
 #define DEFAULT_ATTR NULL
 
 static const int MAX_NUMBER_OF_THREADS = 100;
+static const int MIN_NUMBER_OF_THREADS = 1;
 
 typedef struct PiCalcTask PiCalcTask;
 
 void         PrintUsage();
-int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max);
+int          ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int min, int max);
 PiCalcTask*  PiCalcTasksCreate (int number_of_threads);
 void         PiCalcTasksDelete (void *tasks);
 void         PiCalcTasksInit (PiCalcTask *tasks, int number_of_threads);

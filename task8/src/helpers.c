@@ -40,13 +40,14 @@ int                 get_global_chunk_number ();
 
 void
 PrintUsage () {
-    fputs("Usage:\t<program_name> <number_of_threads>\n", stderr);
-    fprintf (stderr, "\t<number_of_threads> - number of threads to run pi calculation on. Maximum: %d\n",
-             MAX_NUMBER_OF_THREADS);
+    fputs("Usage:\t<program_name> number_of_threads\n", stderr);
+    fputs("\tnumber_of_threads - number of threads to run pi calculation on.\n", stderr);
+    fprintf (stderr, "\tnumber_of_threads should be in range %d...%d.\n",
+             MIN_NUMBER_OF_THREADS, MAX_NUMBER_OF_THREADS);
 }
 
 int
-ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int max) {
+ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threads, int min, int max) {
     if (number_of_threads_string == NULL)
         return EINVAL;
 
@@ -66,14 +67,12 @@ ParseNumberOfThreads (const char *number_of_threads_string, int *number_of_threa
         return EINVAL;
     }
 
-    if (number_of_threads_long <= 0) {
-        fputs ("number_of_threads is not positive\n", stderr);
+    if (number_of_threads_long < min) {
         PrintUsage ();
         return EINVAL;
     }
 
     if (number_of_threads_long > max || number_of_threads_long > INT_MAX) {
-        fputs ("the number of threads is too big\n", stderr);
         PrintUsage ();
         return EINVAL;
     }

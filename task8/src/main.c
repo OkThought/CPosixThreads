@@ -18,7 +18,7 @@ main (int argc, char **argv) {
     int number_of_threads;
     int code;
     char *number_of_threads_string = argv[1];
-    code = ParseNumberOfThreads (number_of_threads_string, &number_of_threads, MAX_NUMBER_OF_THREADS);
+    code = ParseNumberOfThreads (number_of_threads_string, &number_of_threads, MIN_NUMBER_OF_THREADS, MAX_NUMBER_OF_THREADS);
     ExitIfNonZeroWithFormattedMessage (code, "Couldn't parse number of threads from string '%s'",
                                        number_of_threads_string);
 
