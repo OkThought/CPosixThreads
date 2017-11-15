@@ -93,11 +93,11 @@ DestroyResources () {
 
     code = pthread_mutex_destroy (&mutex);
     if (code != SUCCESS)
-        fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror(code));
+        fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror (code));
 
     code = pthread_cond_destroy (&cond);
     if (code != SUCCESS)
-        fprintf (stderr, "Couldn't destroy cond: %s\n", strerror(code));
+        fprintf (stderr, "Couldn't destroy cond: %s\n", strerror (code));
 
     return code;
 }
