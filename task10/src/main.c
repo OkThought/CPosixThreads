@@ -4,6 +4,7 @@
 #include <pthread.h>    // pthread_*
 #include <stdlib.h>     // exit
 #include <string.h>     // strerror
+#include <unistd.h>     // usleep
 
 #define DEFAULT_ATTR NULL
 #define NO_ARG NULL
@@ -14,72 +15,75 @@ static const int COUNT_FROM = 1;
 static const int COUNT_TO = 10;
 static const int NAME_LENGTH = 8;
 static const int SUCCESS = 0;
+static const int MUTEXES_NUMBER = 3;
+static const int TIME_WAIT_BEFORE_CHILD_RUN = 100000; // 100 millis
+static const int PRINTING_PERIOD = 500000; // 500 millis
+static const int CHILD_INITIAL_MUTEX_ID = 2;
+static const int PARENT_INITIAL_MUTEX_ID = 0;
 
 static pthread_mutexattr_t mutexattr;
-static pthread_mutex_t mutex;
-static pthread_cond_t cond;
+static pthread_mutex_t global_mutexes[MUTEXES_NUMBER];
 
-enum Entity {
-    CHILD, PARENT
-};
+int
+LockMutexByCycledId (const char *locking_entity_name, unsigned mutex_id) {
+    mutex_id %= MUTEXES_NUMBER;
+    int code = pthread_mutex_lock (&global_mutexes[mutex_id]);
+//    printf ("%s locks mutex %d\n", locking_entity_name, mutex_id);
+    return code;
+}
 
-static enum Entity printingEntity = PARENT;
+int
+UnlockMutexByCycledId (const char *locking_entity_name, unsigned mutex_id) {
+    mutex_id %= MUTEXES_NUMBER;
+    int code = pthread_mutex_unlock (&global_mutexes[mutex_id]);
+//    printf ("%s unlocks mutex %d\n", locking_entity_name, mutex_id);
+    return code;
+}
 
 void
-PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
+PrintCount (unsigned initial_mutex_id, const char *name, int from, int to) {
     int count;
-    const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
-
+    unsigned mutex_id = initial_mutex_id;
     for (count = from; count <= to; ++count) {
-        // EINVAL:       The value specified by mutex is invalid. (will not happen)
-        // EDEADLK:     A deadlock would occur if the thread blocked waiting for mutex. (will not happen)
-        (void) pthread_mutex_lock (&mutex);
-
-        while (printingEntity != executingEntity) {
-            // EINVAL:  The value specified by cond or the value specified by mutex is invalid. (will not happen)
-            (void) pthread_cond_wait (&cond, &mutex);
-        }
-
+        LockMutexByCycledId (name, mutex_id+1);
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
-
-        printingEntity = waitingEntity ;
-
-        // EINVAL:  The value specified by mutex is invalid. (will not happen)
-        // EPERM:   The current thread does not hold a lock on mutex. (will not happen)
-        (void) pthread_mutex_unlock (&mutex);
+        usleep (PRINTING_PERIOD);
+        UnlockMutexByCycledId (name, mutex_id);
+        ++mutex_id;
     }
+    UnlockMutexByCycledId (name, mutex_id);
+
 }
 
 void*
 RunChild (void *ignored) {
-    PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
+    LockMutexByCycledId ("Child", 2);
+    usleep (TIME_WAIT_BEFORE_CHILD_RUN);
+    PrintCount (CHILD_INITIAL_MUTEX_ID, "Child", COUNT_FROM, COUNT_TO);
     pthread_exit (NO_STATUS);
 }
 
 int
-initializeResources () {
+InitializeResources () {
     int code;
 
     code = pthread_mutexattr_init (&mutexattr);
     if (code != SUCCESS) {
-        fputs("Couldn't init mutex attributes object\n", stderr);
+        fputs ("Couldn't init mutex attributes object\n", stderr);
         return code;
     };
 
     // EINVAL:   The value specified either by type or attr is invalid. (will not happen)
     (void) pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
 
-    code = pthread_mutex_init (&mutex, &mutexattr);
-    if (code != SUCCESS) {
-        fputs("Couldn't init mutex\n", stderr);
-        return code;
-    };
-
-    code = pthread_cond_init (&cond, DEFAULT_ATTR);
-    if (code != SUCCESS) {
-        fputs("Couldn't init cond\n", stderr);
-        return code;
-    };
+    int i;
+    for (i = 0; i < MUTEXES_NUMBER; ++i) {
+        code = pthread_mutex_init (&global_mutexes[i], &mutexattr);
+        if (code != SUCCESS) {
+            fputs ("Couldn't init mutex\n", stderr);
+            return code;
+        };
+    }
 
     // EINVAL:  Invalid value for attr. (ignore)
     (void) pthread_mutexattr_destroy (&mutexattr);
@@ -88,50 +92,44 @@ initializeResources () {
 }
 
 int
-destroyResources() {
-    int code;
-
-    code = pthread_mutex_destroy (&mutex);
-    if (code != SUCCESS)
-        fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror(code));
-
-    code = pthread_cond_destroy (&cond);
-    if (code != SUCCESS)
-        fprintf (stderr, "Couldn't destroy cond: %s\n", strerror(code));
+DestroyResources () {
+    int code = SUCCESS;
+    int i;
+    for (i = 0; i < MUTEXES_NUMBER; ++i) {
+        code = pthread_mutex_destroy (&global_mutexes[i]);
+        if (code != SUCCESS) {
+            fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror (code));
+        }
+    }
 
     return code;
 }
 
 int
-main(int argc, char **argv) {
+main (int argc, char **argv) {
     pthread_t child_thread;
-    int code;
     int exit_status = EXIT_SUCCESS;
-
-    code = initializeResources ();
+    int code;
+    code = InitializeResources ();
     ExitIfNonZeroWithMessage (code, "Couldn't initialize resources");
 
     code = pthread_create (&child_thread, DEFAULT_ATTR, RunChild, NO_ARG);
     if (code != SUCCESS) {
-        (void) destroyResources ();
-        exit_status = EXIT_FAILURE;
-        fputs("Couldn't start child_thread\n", stderr);
+        (void) DestroyResources ();
+        fputs ("Couldn't start child_thread\n", stderr);
+        exit (EXIT_FAILURE);
     };
 
-    PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
+    LockMutexByCycledId ("Parent", 0);
 
-    // EINVAL:   The implementation has detected that the value specified by thread does not refer to a joinable thread.
-    // (will not happen)
-    // ESRCH:    No thread could be found corresponding to that specified by the given thread ID, thread.
-    // (will not happen)
-    // EDEADLK:  A deadlock was detected or the value of thread specifies the calling thread.
-    // (will not happen)
-    (void) pthread_join(child_thread, IGNORE_STATUS);
+    PrintCount (PARENT_INITIAL_MUTEX_ID, "Parent", COUNT_FROM, COUNT_TO);
 
-    code = destroyResources ();
+    (void) pthread_join (child_thread, IGNORE_STATUS);
+
+    code = DestroyResources ();
     if (code != SUCCESS) {
         exit_status = EXIT_FAILURE;
-        fputs("Error in destroyResources\n", stderr);
+        fputs ("Error in DestroyResources\n", stderr);
     };
 
     exit (exit_status);
