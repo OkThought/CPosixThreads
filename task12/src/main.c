@@ -57,12 +57,12 @@ RunChild (void *ignored) {
 }
 
 int
-initializeResources () {
+InitializeResources () {
     int code;
 
     code = pthread_mutexattr_init (&mutexattr);
     if (code != SUCCESS) {
-        fputs("Couldn't init mutex attributes object\n", stderr);
+        fputs ("Couldn't init mutex attributes object\n", stderr);
         return code;
     };
 
@@ -71,13 +71,13 @@ initializeResources () {
 
     code = pthread_mutex_init (&mutex, &mutexattr);
     if (code != SUCCESS) {
-        fputs("Couldn't init mutex\n", stderr);
+        fputs ("Couldn't init mutex\n", stderr);
         return code;
     };
 
     code = pthread_cond_init (&cond, DEFAULT_ATTR);
     if (code != SUCCESS) {
-        fputs("Couldn't init cond\n", stderr);
+        fputs ("Couldn't init cond\n", stderr);
         return code;
     };
 
@@ -88,7 +88,7 @@ initializeResources () {
 }
 
 int
-destroyResources() {
+DestroyResources () {
     int code;
 
     code = pthread_mutex_destroy (&mutex);
@@ -103,19 +103,18 @@ destroyResources() {
 }
 
 int
-main(int argc, char **argv) {
+main (int argc, char **argv) {
     pthread_t child_thread;
-    int code;
     int exit_status = EXIT_SUCCESS;
-
-    code = initializeResources ();
+    int code;
+    code = InitializeResources ();
     ExitIfNonZeroWithMessage (code, "Couldn't initialize resources");
 
     code = pthread_create (&child_thread, DEFAULT_ATTR, RunChild, NO_ARG);
     if (code != SUCCESS) {
-        (void) destroyResources ();
-        exit_status = EXIT_FAILURE;
-        fputs("Couldn't start child_thread\n", stderr);
+        (void) DestroyResources ();
+        fputs ("Couldn't start child_thread\n", stderr);
+        exit (EXIT_FAILURE);
     };
 
     PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
@@ -126,12 +125,12 @@ main(int argc, char **argv) {
     // (will not happen)
     // EDEADLK:  A deadlock was detected or the value of thread specifies the calling thread.
     // (will not happen)
-    (void) pthread_join(child_thread, IGNORE_STATUS);
+    (void) pthread_join (child_thread, IGNORE_STATUS);
 
-    code = destroyResources ();
+    code = DestroyResources ();
     if (code != SUCCESS) {
         exit_status = EXIT_FAILURE;
-        fputs("Error in destroyResources\n", stderr);
+        fputs ("Error in DestroyResources\n", stderr);
     };
 
     exit (exit_status);
