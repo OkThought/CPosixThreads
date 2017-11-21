@@ -1,6 +1,7 @@
+#include "usage.h"
+
 #include <stdio.h>
 #include <errno.h>
-#include "usage.h"
 #include <stdarg.h>
 
 static const int SUCCESS = 0;
@@ -21,7 +22,7 @@ static int print_usage_header_v (const char *program_name, const char *program_d
             return EINVAL;
         }
 
-        const char *arg_description = va_arg (args, const char *);
+        va_arg (args, const char *); // arg_description
 
         if (optional) {
             fprintf (stderr, " [%s]", arg_name);
