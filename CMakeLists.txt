@@ -8,12 +8,12 @@ set(CMAKE_C_STANDARD 90)
 set(UTIL_HEADER_FILES
         util/include/list.h
         util/include/err_check.h
-        util/include/stack.h)
+        util/include/stack.h util/include/parse.h util/include/usage.h util/include/bubble_sort.h)
 
 set(UTIL_SOURCE_FILES
         util/src/list.c
         util/src/err_check.c
-        util/src/stack.c)
+        util/src/stack.c util/include/parse.h util/src/parse.c util/include/usage.h util/src/usage.c util/include/bubble_sort.h util/src/bubble_sort.c)
 
 add_library(util ${UTIL_SOURCE_FILES} ${UTIL_HEADER_FILES})
 
@@ -115,6 +115,20 @@ target_include_directories(
 
 target_link_libraries(task8 util)
 
+#============== task9 ==============
+
+set(TASK9_SOURCE_FILES task9/src/main.c task9/src/dinner.c task9/include/dinner.h)
+
+add_executable(task9 ${TASK9_SOURCE_FILES})
+
+target_include_directories(
+        task9 PUBLIC
+        task9/include
+        util/include
+)
+
+target_link_libraries(task9 util)
+
 #============== task10 ==============
 
 set(TASK10_SOURCE_FILES task10/src/main.c)
@@ -127,3 +141,16 @@ target_include_directories(
 )
 
 target_link_libraries(task10 util)
+
+#============== task12 ==============
+
+set(TASK12_SOURCE_FILES task12/src/main.c)
+
+add_executable(task12 ${TASK12_SOURCE_FILES})
+
+target_include_directories(
+        task12 PUBLIC
+        util/include
+)
+
+target_link_libraries(task12 util)
