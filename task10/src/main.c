@@ -57,7 +57,7 @@ PrintCount (unsigned initial_mutex_id, const char *name, int from, int to) {
 
 void*
 RunChild (void *ignored) {
-    LockMutexByCycledId ("Child", 2);
+    LockMutexByCycledId ("Child", CHILD_INITIAL_MUTEX_ID);
     usleep (TIME_WAIT_BEFORE_CHILD_RUN);
     PrintCount (CHILD_INITIAL_MUTEX_ID, "Child", COUNT_FROM, COUNT_TO);
     pthread_exit (NO_STATUS);
@@ -120,7 +120,7 @@ main (int argc, char **argv) {
         exit (EXIT_FAILURE);
     };
 
-    LockMutexByCycledId ("Parent", 0);
+    LockMutexByCycledId ("Parent", PARENT_INITIAL_MUTEX_ID);
 
     PrintCount (PARENT_INITIAL_MUTEX_ID, "Parent", COUNT_FROM, COUNT_TO);
 
