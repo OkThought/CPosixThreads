@@ -10,12 +10,12 @@
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
+#define MUTEXES_NUMBER 3
 
 static const int COUNT_FROM = 1;
 static const int COUNT_TO = 10;
 static const int NAME_LENGTH = 8;
 static const int SUCCESS = 0;
-static const int MUTEXES_NUMBER = 3;
 static const int TIME_WAIT_BEFORE_CHILD_RUN = 100000; // 100 millis
 static const int PRINTING_PERIOD = 500000; // 500 millis
 static const int CHILD_INITIAL_MUTEX_ID = 2;
