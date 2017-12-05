@@ -17,7 +17,6 @@ static const int COUNT_TO = 10;
 static const int NAME_LENGTH = 8;
 static const int SUCCESS = 0;
 static const int TIME_WAIT_BEFORE_CHILD_RUN = 100000; // 100 millis
-static const int PRINTING_PERIOD = 500000; // 500 millis
 static const int CHILD_INITIAL_MUTEX_ID = 2;
 static const int PARENT_INITIAL_MUTEX_ID = 0;
 
@@ -47,12 +46,10 @@ PrintCount (unsigned initial_mutex_id, const char *name, int from, int to) {
     for (count = from; count <= to; ++count) {
         LockMutexByCycledId (name, mutex_id+1);
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
-        usleep (PRINTING_PERIOD);
         UnlockMutexByCycledId (name, mutex_id);
         ++mutex_id;
     }
     UnlockMutexByCycledId (name, mutex_id);
-
 }
 
 void*
