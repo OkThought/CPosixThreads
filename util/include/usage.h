@@ -1,6 +1,8 @@
 #ifndef UTIL_USAGE_H
 #define UTIL_USAGE_H
 
+#include <stdlib.h>
+
 const int OPTIONAL_ARGUMENT = 1;
 const int REQUIRED_ARGUMENT = 0;
 const char *NO_DESCRIPTION = NULL;
