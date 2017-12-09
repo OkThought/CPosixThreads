@@ -84,32 +84,22 @@ PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
     int count;
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
-    int code = pthread_mutex_lock (&mutex);
-    if (code != SUCCESS) {
-        fprintf (stderr, strerror (code));
-    }
+    (void) pthread_mutex_lock (&mutex);
+
     for (count = from; count <= to; ++count) {
 
         while (printingEntity != executingEntity) {
-            code = pthread_cond_wait (&entity_switch_cond, &mutex);
-            if (code != SUCCESS) {
-                fprintf (stderr, strerror (code));
-            }
+            (void) pthread_cond_wait (&entity_switch_cond, &mutex);
         }
 
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
 
         printingEntity = waitingEntity;
 
-        code = pthread_cond_signal (&entity_switch_cond);
-        if (code != SUCCESS) {
-            fprintf (stderr, strerror (code));
-        }
+        (void) pthread_cond_signal (&entity_switch_cond);
     }
-    code = pthread_mutex_unlock (&mutex);
-    if (code != SUCCESS) {
-        fprintf (stderr, strerror (code));
-    }
+
+    (void) pthread_mutex_unlock (&mutex);
 }
 
 void*
