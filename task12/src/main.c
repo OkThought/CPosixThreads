@@ -26,32 +26,6 @@ enum Entity {
 
 static enum Entity printingEntity = PARENT;
 
-void
-PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
-    int count;
-    const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
-
-    for (count = from; count <= to; ++count) {
-        (void) pthread_mutex_lock (&mutex);
-
-        while (printingEntity != executingEntity) {
-            (void) pthread_cond_wait (&entity_switch_cond, &mutex);
-        }
-
-        (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
-
-        printingEntity = waitingEntity ;
-
-        (void) pthread_mutex_unlock (&mutex);
-    }
-}
-
-void*
-RunChild (void *ignored) {
-    PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
-    pthread_exit (NO_STATUS);
-}
-
 int
 InitializeResources () {
     int code;
@@ -103,6 +77,45 @@ DestroyResources () {
     }
 
     return code;
+}
+
+void
+PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
+    int count;
+    const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
+
+    int code = pthread_mutex_lock (&mutex);
+    if (code != SUCCESS) {
+        fprintf (stderr, strerror (code));
+    }
+    for (count = from; count <= to; ++count) {
+
+        while (printingEntity != executingEntity) {
+            code = pthread_cond_wait (&entity_switch_cond, &mutex);
+            if (code != SUCCESS) {
+                fprintf (stderr, strerror (code));
+            }
+        }
+
+        (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
+
+        printingEntity = waitingEntity;
+
+        code = pthread_cond_signal (&entity_switch_cond);
+        if (code != SUCCESS) {
+            fprintf (stderr, strerror (code));
+        }
+    }
+    code = pthread_mutex_unlock (&mutex);
+    if (code != SUCCESS) {
+        fprintf (stderr, strerror (code));
+    }
+}
+
+void*
+RunChild (void *ignored) {
+    PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
+    pthread_exit (NO_STATUS);
 }
 
 int
