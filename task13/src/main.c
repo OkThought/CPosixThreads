@@ -3,7 +3,6 @@
 #include <stdio.h>      // puts
 #include <pthread.h>    // pthread_*
 #include <stdlib.h>     // exit
-#include <string.h>     // strerror
 #include <errno.h>
 #include <semaphore.h>
 
@@ -11,7 +10,6 @@
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
-#define NO_NAME NULL
 #define NOT_PSHARED
 
 static const int COUNT_FROM = 1;
