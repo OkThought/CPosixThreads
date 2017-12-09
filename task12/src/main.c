@@ -113,6 +113,7 @@ main (int argc, char **argv) {
     pthread_t child_thread;
     int exit_status = EXIT_SUCCESS;
     int code;
+
     code = InitializeResources ();
     ExitIfNonZeroWithMessage (code, "Couldn't initialize resources");
 
