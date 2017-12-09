@@ -154,3 +154,16 @@ target_include_directories(
 )
 
 target_link_libraries(task12 util)
+
+#============== task13 ==============
+
+set(TASK13_SOURCE_FILES task13/src/main.c)
+
+add_executable(task13 ${TASK13_SOURCE_FILES})
+
+target_include_directories(
+        task13 PUBLIC
+        util/include
+)
+
+target_link_libraries(task12 util)
