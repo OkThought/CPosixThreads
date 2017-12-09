@@ -5,26 +5,27 @@
 #include <stdlib.h>     // exit
 #include <string.h>     // strerror
 #include <errno.h>
+#include <semaphore.h>
 
 #define DEFAULT_ATTR NULL
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
+#define NO_NAME NULL
+#define NOT_PSHARED
 
 static const int COUNT_FROM = 1;
 static const int COUNT_TO = 10;
 static const int NAME_LENGTH = 8;
 static const int SUCCESS = 0;
 
-static pthread_mutexattr_t mutexattr;
-static pthread_mutex_t mutex;
-static pthread_cond_t entity_switch_cond;
+#define SEMAPHORE_NUMBER 2
+static sem_t semaphores[SEMAPHORE_NUMBER];
 
 enum Entity {
-    CHILD, PARENT
+    CHILD = 0,
+    PARENT = 1,
 };
-
-static enum Entity printingEntity = PARENT;
 
 void
 PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
@@ -32,17 +33,11 @@ PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
     for (count = from; count <= to; ++count) {
-        (void) pthread_mutex_lock (&mutex);
-
-        while (printingEntity != executingEntity) {
-            (void) pthread_cond_wait (&entity_switch_cond, &mutex);
-        }
+        (void) sem_wait (&semaphores[executingEntity]);
 
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
 
-        printingEntity = waitingEntity ;
-
-        (void) pthread_mutex_unlock (&mutex);
+        (void) sem_post (&semaphores[waitingEntity]);
     }
 }
 
@@ -54,55 +49,31 @@ RunChild (void *ignored) {
 
 int
 InitializeResources () {
-    int code;
+    int code = SUCCESS;
 
-    code = pthread_mutexattr_init (&mutexattr);
-    if (code == ENOMEM) {
-        (void) fputs ("Fatal: Not enough memory to init mutex attributes object\n", stderr);
-        return code;
+    for (int i = 0; i < SEMAPHORE_NUMBER; ++i) {
+#ifndef __APPLE__
+        code = sem_init (&semaphores[i], NOT_PSHARED, i);
+#endif
+        if (code == ENOSPC) {
+            (void) fprintf (stderr, "A resource required to initialize the semaphore has been exhausted, "
+                    "or the limit on semaphores ({SEM_NSEMS_MAX}) has been reached.");
+            return code;
+        }
     }
-
-    // ignore EINVAL
-    (void) pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
-
-    code = pthread_mutex_init (&mutex, &mutexattr);
-    if (code == ENOMEM) {
-        (void) fputs ("Fatal: Not enough memory to init mutex object\n", stderr);
-        return code;
-    } else if (code == EAGAIN) {
-        (void) fputs ("Warning: System lacks resources to init mutex object\n", stderr);
-        return code;
-    } // ignore EPERM, EINVAL
-
-    code = pthread_cond_init (&entity_switch_cond, DEFAULT_ATTR);
-    if (code == ENOMEM) {
-        (void) fputs ("Fatal: Not enough memory to init cond object\n", stderr);
-        return code;
-    } else if (code == EAGAIN) {
-        (void) fputs ("Warning: System lacks resources to init cond object\n", stderr);
-        return code;
-    }
-
-    (void) pthread_mutexattr_destroy (&mutexattr);
 
     return SUCCESS;
 }
 
 int
 DestroyResources () {
-    int code;
-
-    code = pthread_mutex_destroy (&mutex);
-    if (code != SUCCESS) {
-        (void) fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror (code));
+    for (int i = 0; i < SEMAPHORE_NUMBER; ++i) {
+#ifndef __APPLE__
+        (void) sem_destroy (&semaphores[i]);
+#endif
     }
 
-    code = pthread_cond_destroy (&entity_switch_cond);
-    if (code != SUCCESS) {
-        (void) fprintf (stderr, "Couldn't destroy cond: %s\n", strerror (code));
-    }
-
-    return code;
+    return SUCCESS;
 }
 
 int
