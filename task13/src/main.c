@@ -10,7 +10,7 @@
 #define NO_ARG NULL
 #define NO_STATUS NULL
 #define IGNORE_STATUS NULL
-#define NOT_PSHARED
+#define NOT_PSHARED 0
 
 static const int COUNT_FROM = 1;
 static const int COUNT_TO = 10;
@@ -49,7 +49,8 @@ int
 InitializeResources () {
     int code = SUCCESS;
 
-    for (int i = 0; i < SEMAPHORE_NUMBER; ++i) {
+    int i;
+    for (i = 0; i < SEMAPHORE_NUMBER; ++i) {
 #ifndef __APPLE__
         code = sem_init (&semaphores[i], NOT_PSHARED, i);
 #endif
@@ -65,7 +66,8 @@ InitializeResources () {
 
 int
 DestroyResources () {
-    for (int i = 0; i < SEMAPHORE_NUMBER; ++i) {
+    int i;
+    for (i = 0; i < SEMAPHORE_NUMBER; ++i) {
 #ifndef __APPLE__
         (void) sem_destroy (&semaphores[i]);
 #endif
