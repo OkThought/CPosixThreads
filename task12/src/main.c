@@ -18,7 +18,7 @@ static const int SUCCESS = 0;
 
 static pthread_mutexattr_t mutexattr;
 static pthread_mutex_t mutex;
-static pthread_cond_t cond;
+static pthread_cond_t entity_switch_cond;
 
 enum Entity {
     CHILD, PARENT
@@ -35,7 +35,7 @@ PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
         (void) pthread_mutex_lock (&mutex);
 
         while (printingEntity != executingEntity) {
-            (void) pthread_cond_wait (&cond, &mutex);
+            (void) pthread_cond_wait (&entity_switch_cond, &mutex);
         }
 
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
@@ -57,18 +57,29 @@ InitializeResources () {
     int code;
 
     code = pthread_mutexattr_init (&mutexattr);
-    if (code != SUCCESS) {
-        (void) fputs ("Couldn't init mutex attributes object\n", stderr);
+    if (code == ENOMEM) {
+        (void) fputs ("Fatal: Not enough memory to init mutex attributes object\n", stderr);
         return code;
     }
 
+    // ignore EINVAL
     (void) pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
 
-    (void) pthread_mutex_init (&mutex, &mutexattr);
+    code = pthread_mutex_init (&mutex, &mutexattr);
+    if (code == ENOMEM) {
+        (void) fputs ("Fatal: Not enough memory to init mutex object\n", stderr);
+        return code;
+    } else if (code == EAGAIN) {
+        (void) fputs ("Warning: System lacks resources to init mutex object\n", stderr);
+        return code;
+    } // ignore EPERM, EINVAL
 
-    code = pthread_cond_init (&cond, DEFAULT_ATTR);
-    if (code != SUCCESS) {
-        (void) fputs ("Couldn't init cond\n", stderr);
+    code = pthread_cond_init (&entity_switch_cond, DEFAULT_ATTR);
+    if (code == ENOMEM) {
+        (void) fputs ("Fatal: Not enough memory to init cond object\n", stderr);
+        return code;
+    } else if (code == EAGAIN) {
+        (void) fputs ("Warning: System lacks resources to init cond object\n", stderr);
         return code;
     }
 
@@ -86,7 +97,7 @@ DestroyResources () {
         (void) fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror (code));
     }
 
-    code = pthread_cond_destroy (&cond);
+    code = pthread_cond_destroy (&entity_switch_cond);
     if (code != SUCCESS) {
         (void) fprintf (stderr, "Couldn't destroy cond: %s\n", strerror (code));
     }
