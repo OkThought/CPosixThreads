@@ -4,6 +4,7 @@
 #include <pthread.h>    // pthread_*
 #include <stdlib.h>     // exit
 #include <string.h>     // strerror
+#include <errno.h>
 
 #define DEFAULT_ATTR NULL
 #define NO_ARG NULL
@@ -59,21 +60,17 @@ InitializeResources () {
     if (code != SUCCESS) {
         (void) fputs ("Couldn't init mutex attributes object\n", stderr);
         return code;
-    };
+    }
 
     (void) pthread_mutexattr_settype (&mutexattr, PTHREAD_MUTEX_ERRORCHECK);
 
-    code = pthread_mutex_init (&mutex, &mutexattr);
-    if (code != SUCCESS) {
-        (void) fputs ("Couldn't init mutex\n", stderr);
-        return code;
-    };
+    (void) pthread_mutex_init (&mutex, &mutexattr);
 
     code = pthread_cond_init (&cond, DEFAULT_ATTR);
     if (code != SUCCESS) {
         (void) fputs ("Couldn't init cond\n", stderr);
         return code;
-    };
+    }
 
     (void) pthread_mutexattr_destroy (&mutexattr);
 
@@ -85,12 +82,14 @@ DestroyResources () {
     int code;
 
     code = pthread_mutex_destroy (&mutex);
-    if (code != SUCCESS)
+    if (code != SUCCESS) {
         (void) fprintf (stderr, "Couldn't destroy mutex: %s\n", strerror (code));
+    }
 
     code = pthread_cond_destroy (&cond);
-    if (code != SUCCESS)
+    if (code != SUCCESS) {
         (void) fprintf (stderr, "Couldn't destroy cond: %s\n", strerror (code));
+    }
 
     return code;
 }
