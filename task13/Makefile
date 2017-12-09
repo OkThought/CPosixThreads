@@ -23,7 +23,7 @@ OBJ						:= $(addprefix $(OBJDIR)/, $(notdir $(SRC:.c=.o)))
 
 INCLUDE					+= $(addprefix -I, $(INCDIR))
 CFLAGS					+= -Wall -Werror
-CLFLAGS					+=
+CLFLAGS					+= -lrt
 
 ECHO					:= @echo
 ECHO_BEGIN				:= $(ECHO)
