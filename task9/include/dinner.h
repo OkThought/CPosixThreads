@@ -26,7 +26,8 @@ int                              PrepareDinnerInvitations (Table *table,
 int                              WaiterControlTable (Table *table,
                                                      Philosopher *philosophers,
                                                      DinnerInvitation *dinnerInvitations,
-                                                     unsigned spaghettiPerPlate);
+                                                     unsigned spaghettiPerPlateMin,
+                                                     unsigned spaghettiPerPlateMax);
 
 int                              DinnerBegin (Philosopher *philosophers,
                                               DinnerInvitation *invitations,

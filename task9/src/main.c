@@ -5,9 +5,10 @@
 #include <string.h>
 #include <errno.h>
 
-#define PHILOSOPHERS_NUMBER 5
+#define PHILOSOPHERS_NUMBER 10
 
-static const unsigned SPAGHETTI_PER_PLATE = 100;
+static const unsigned SPAGHETTI_PER_PLATE_MIN = 10;
+static const unsigned SPAGHETTI_PER_PLATE_MAX = 40;
 static Philosopher philosophers[PHILOSOPHERS_NUMBER];
 
 int
@@ -35,7 +36,7 @@ main () {
         exit (EXIT_FAILURE);
     }
 
-    code = WaiterControlTable (table, philosophers, dinnerInvitations, SPAGHETTI_PER_PLATE);
+    code = WaiterControlTable (table, philosophers, dinnerInvitations, SPAGHETTI_PER_PLATE_MIN, SPAGHETTI_PER_PLATE_MAX);
     if (code != SUCCESS) {
         DeleteTable (table);
         DeleteDinnerInvitations (dinnerInvitations);
