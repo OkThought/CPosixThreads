@@ -5,7 +5,8 @@
 #include <string.h>
 #include <errno.h>
 
-static const unsigned PHILOSOPHERS_NUMBER = 5;
+#define PHILOSOPHERS_NUMBER 5
+
 static const unsigned SPAGHETTI_PER_PLATE = 100;
 static Philosopher philosophers[PHILOSOPHERS_NUMBER];
 
