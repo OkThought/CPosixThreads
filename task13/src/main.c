@@ -5,6 +5,7 @@
 #include <stdlib.h>     // exit
 #include <errno.h>
 #include <semaphore.h>
+#include <memory.h>
 
 #define DEFAULT_ATTR NULL
 #define NO_ARG NULL
@@ -24,29 +25,6 @@ enum Entity {
     CHILD = 0,
     PARENT = 1,
 };
-
-void
-PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
-    int count;
-    const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
-
-    int code;
-    for (count = from; count <= to; ++count) {
-        do {
-            code = sem_wait (&semaphores[executingEntity]);
-        } while (code == EINTR);
-
-        (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
-
-        (void) sem_post (&semaphores[waitingEntity]);
-    }
-}
-
-void*
-RunChild (void *ignored) {
-    PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
-    pthread_exit (NO_STATUS);
-}
 
 int
 InitializeResources () {
@@ -79,6 +57,31 @@ DestroyResources () {
     return SUCCESS;
 }
 
+void
+PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
+    int count;
+    const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
+
+    int code;
+    for (count = from; count <= to; ++count) {
+        do {
+            code = sem_wait (&semaphores[executingEntity]);
+        } while (code == EINTR);
+        ExitIfNonZero (code);
+
+        (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
+
+        code = sem_post (&semaphores[waitingEntity]);
+        ExitIfNonZeroWithMessage (code, strerror(errno));
+    }
+}
+
+void*
+RunChild (void *ignored) {
+    PrintCount (CHILD, "Child", COUNT_FROM, COUNT_TO);
+    pthread_exit (NO_STATUS);
+}
+
 int
 main (int argc, char **argv) {
     pthread_t child_thread;
@@ -88,11 +91,7 @@ main (int argc, char **argv) {
     ExitIfNonZeroWithMessage (code, "Couldn't initialize resources");
 
     code = pthread_create (&child_thread, DEFAULT_ATTR, RunChild, NO_ARG);
-    if (code != SUCCESS) {
-        (void) DestroyResources ();
-        (void) fputs ("Couldn't start child_thread\n", stderr);
-        exit (EXIT_FAILURE);
-    };
+    ExitIfNonZeroWithMessage (code, "Couldn't start child");
 
     PrintCount (PARENT, "Parent", COUNT_FROM, COUNT_TO);
 
