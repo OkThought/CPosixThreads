@@ -5,7 +5,7 @@
 #include <stdlib.h>     // exit
 #include <errno.h>
 #include <semaphore.h>
-#include <memory.h>
+#include <string.h>
 
 #define DEFAULT_ATTR NULL
 #define NO_ARG NULL
