@@ -30,10 +30,14 @@ PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
     int count;
     const enum Entity waitingEntity = executingEntity == PARENT ? CHILD : PARENT;
 
+    int code;
     for (count = from; count <= to; ++count) {
-        (void) sem_wait (&semaphores[executingEntity]);
+        do {
+            code = sem_wait (&semaphores[executingEntity]);
+        } while (code == EINTR);
 
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
+
 
         (void) sem_post (&semaphores[waitingEntity]);
     }
