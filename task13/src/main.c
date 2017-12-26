@@ -38,7 +38,6 @@ PrintCount (enum Entity executingEntity, const char *name, int from, int to) {
 
         (void) printf ("%*s counts %d\n", NAME_LENGTH, name, count);
 
-
         (void) sem_post (&semaphores[waitingEntity]);
     }
 }
