@@ -83,6 +83,14 @@ void *produce_simple_detail (const char *detail_name,
     pthread_exit (NO_STATUS);
 }
 
+int sem_wait_ignoring_interrupt(sem_t *semaphore) {
+    int code;
+    do {
+        code = sem_wait (semaphore);
+    } while (code == EINTR);
+    return code;
+}
+
 void *produce_detail_a (void *ignored) {
     return produce_simple_detail ("A", A_DETAIL_CREATION_TIME, &sem[DETAIL_A]);
 }
@@ -99,18 +107,18 @@ void *produce_module (void *ignored) {
     int detail_a_id = 0;
     int detail_b_id = 0;
     int module_id = 0;
-    sem_wait (&sem[DETAIL_A]);
-    sem_wait (&sem[DETAIL_B]);
+    (void) sem_wait_ignoring_interrupt (&sem[DETAIL_A]);
+    (void) sem_wait_ignoring_interrupt (&sem[DETAIL_B]);
     while (global_state == RUNNING) {
-        sem_post (&sem[MODULE]);
+        (void) sem_post (&sem[MODULE]);
         (void) printf ("module-%d produced from (A-%d, B-%d)\n",
                 module_id, detail_a_id, detail_b_id);
         ++detail_a_id;
         ++detail_b_id;
         ++module_id;
 
-        sem_wait (&sem[DETAIL_A]);
-        sem_wait (&sem[DETAIL_B]);
+        (void) sem_wait_ignoring_interrupt (&sem[DETAIL_A]);
+        (void) sem_wait_ignoring_interrupt (&sem[DETAIL_B]);
     }
     pthread_exit (NO_STATUS);
 }
@@ -119,16 +127,16 @@ void *produce_widget (void *ignored) {
     int widget_id = 0;
     int module_id = 0;
     int detail_c_id = 0;
-    sem_wait (&sem[DETAIL_C]);
-    sem_wait (&sem[MODULE]);
+    (void) sem_wait_ignoring_interrupt (&sem[DETAIL_C]);
+    (void) sem_wait_ignoring_interrupt (&sem[MODULE]);
     while (global_state == RUNNING) {
         (void) printf ("widget-%d produced from (C-%d, M-%d)\n",
                 widget_id, detail_c_id, module_id);
         widget_id++;
         detail_c_id++;
         module_id++;
-        sem_wait (&sem[DETAIL_C]);
-        sem_wait (&sem[MODULE]);
+        (void) sem_wait_ignoring_interrupt (&sem[DETAIL_C]);
+        (void) sem_wait_ignoring_interrupt (&sem[MODULE]);
     }
     pthread_exit (NO_STATUS);
 }
@@ -160,12 +168,12 @@ int join_all_producers (pthread_t *producers, int producer_count) {
 int main () {
     int code = SetSignalHandler ();
     if (code != SUCCESS) {
-        fprintf (stderr, "SIGINT handler was not set: %s\n", strerror (code));
+        (void) fprintf (stderr, "SIGINT handler was not set: %s\n", strerror (code));
     }
 
     code = InitSemaphores ();
     if (code != SUCCESS) {
-        fprintf (stderr, "Unable to initialize semaphore: %s\n", strerror (code));
+        (void) fprintf (stderr, "Unable to initialize semaphore: %s\n", strerror (code));
         destroy_semaphores ();
         exit (EXIT_FAILURE);
     }
