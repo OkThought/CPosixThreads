@@ -115,7 +115,7 @@ void *produce_module (void *ignored) {
     pthread_exit (NO_STATUS);
 }
 
-void *produce_widget (void *arg) {
+void *produce_widget (void *ignored) {
     int widget_id = 0;
     int module_id = 0;
     int detail_c_id = 0;
